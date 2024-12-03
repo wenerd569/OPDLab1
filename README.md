@@ -12,7 +12,7 @@ ssh -L 60605:se.ifmo.ru:60605 -p 2222 -l <user>
 
 ~/dishwasher/clean_file
 
-dishwasher.jar можно кинуть куда угодно и запустить
+dishwasher.jar можно кинуть куда угодно на гелиосе и запустить
 
 ## woman.sh - Основной скрипт
 
