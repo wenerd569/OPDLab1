@@ -5,7 +5,7 @@ start_dishwasher(){
   dir=$1
   file=$2
   mod=$3
-  port=${4-"60610"}
+  port=${4-"60605"}
   # g=${5-''}
   # sshcon='helios'
   # if [[ -n "$5" ]]; then
