@@ -1,8 +1,9 @@
 package dishwasher;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
+import java.io.File;
 
 public class App {
     public static void main(String[] args) {
@@ -10,23 +11,24 @@ public class App {
         try{
             port = Integer.parseInt(args[0]);
         } catch (Exception e){
-            port = 60610;
+            port = 60605;
         }
-        String dir = System.getProperty("user.dir") + "/dishwasher";
-        InetSocketAddress address = new InetSocketAddress(port);
-        var dishwasher = new Dishwasher(dir + "/dirty_file", dir + "/clear_file");
-        var controler = new DishWasherControler(address, dishwasher);
-        controler.setTcpNoDelay(true);
-        controler.setDaemon(true);
-        controler.start();
+        String dir = System.getenv("HOME") + "/dishwasher";
+        File dirty_file = new File(dir + "/dirty_file");
+        File clean_file = new File(dir + "/clean_file");
+        dirty_file.mkdir();
+        clean_file.mkdir();
+
+
+        var dishwasher = new Dishwasher(dirty_file, clean_file);
+        var controler = new DishWasherControler(port, dishwasher);
+                
         try{
             BufferedReader sysin = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
                 String in = sysin.readLine();
-                controler.broadcast(in);
                 if (in.equals("exit")) {
-                    controler.stop(1000);
-                    break;
+                    return;
                 }
             }
         } catch (Exception e){

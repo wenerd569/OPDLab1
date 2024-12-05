@@ -1,36 +1,40 @@
 package dishwasher;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.*;
+import java.net.ServerSocket;
 
 import dishwasher.Dishwasher.WashMode;
 
-public class DishWasherControler extends WebSocketServer{
+
+
+
+public class DishWasherControler{
     Dishwasher dishwasher;
+    ServerSocket serverSocket;
 
-    public DishWasherControler(InetSocketAddress address, Dishwasher dishwasher){
-        super(address);
+    public DishWasherControler(int port, Dishwasher dishwasher){
         this.dishwasher = dishwasher;
+        WSoket socket;
+        
+        try {
+            serverSocket = new ServerSocket(port);
+            while (true) {
+                socket = new WSoket(serverSocket.accept());
+                while (true) {
+                    if (socket.isClosed())
+                        break;
+                    
+                    var message = socket.recive_line();
+                    if (message == null || message == "")
+                        continue;
+                    onMessage(socket, message);
+                }
+            }
+        } catch (IOException e) { }
     }
-
-    @Override
-    public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        System.out.println(conn + " is open");
-        conn.send("welcome");
-    }
-
-    @Override
-    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        System.out.println(conn + " is close");
-    }
-
-    @Override
-    public void onMessage(WebSocket conn, String message) {
-        System.out.println(message);
+    
+    
+    public void onMessage(WSoket conn, String message) {
         var parts = message.split(" ");
         switch (parts[0].toLowerCase()){
             case "start":
@@ -54,6 +58,7 @@ public class DishWasherControler extends WebSocketServer{
                     conn.send("Сompleted");
                     conn.close();
                 } catch (IOException e) {
+                    System.out.print(e.getMessage());
                     conn.send("File read or write error");
                     conn.close();
                 }
@@ -63,18 +68,5 @@ public class DishWasherControler extends WebSocketServer{
                 conn.close();
                 break;
         }
-    }
-
-    @Override
-    public void onError(WebSocket conn, Exception ex) {
-        System.out.println(conn + " has error");
-        ex.printStackTrace();
-    }
-
-    @Override
-    public void onStart() {
-        System.out.println("Server started on port " + getPort());
-        setConnectionLostTimeout(0);
-        setConnectionLostTimeout(100);
     }
 }

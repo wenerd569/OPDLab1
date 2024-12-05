@@ -25,10 +25,10 @@ public class Dishwasher
     protected double washMode = 0;
     static private final int BUFFER_SIZE = 1024;
 
-    protected String cleanDir;
-    protected String dirtyDir;
+    protected File cleanDir;
+    protected File dirtyDir;
 
-    public Dishwasher(String dirtyDir, String cleanDir){
+    public Dishwasher(File dirtyDir, File cleanDir){
         this.dirtyDir = dirtyDir;
         this.cleanDir = cleanDir;
     }
@@ -38,13 +38,15 @@ public class Dishwasher
         this.washMode = washMode.getCleaningPercentage();
     }
     
-    public void start() throws IOException{   
-        File folder = new File(dirtyDir);
-        File[] listOfFiles = folder.listFiles();
+    public void start() throws IOException{
+        File[] listOfFiles = dirtyDir.listFiles();
+        if (listOfFiles == null)
+            return;
 
         for (File in : listOfFiles) {
             if (in.isFile()) {
-                File out = new File(cleanDir + "/" + in.getName());
+                File out = new File(cleanDir, in.getName());
+                out.createNewFile();
                 washFile(in, out);
             }
         }
@@ -64,6 +66,7 @@ public class Dishwasher
             washString(buff);
             writer.write(buff);
         }
+        in.delete();
         reader.close();
         writer.close();
     }
@@ -71,7 +74,7 @@ public class Dishwasher
     public void washString(char[] string){
         Random random = new Random();
         for (int i = 0; i < string.length; i++){
-            if (random.nextDouble()<washMode){
+            if (string[i] != '\n' && random.nextDouble()<washMode){
                 string[i] = ' ';
             }
         }
